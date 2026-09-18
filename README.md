@@ -57,9 +57,32 @@ python3 -m http.server 8000
 
 ## Keeping the resume in sync
 
-`resume/resume.md` is the source of truth. When it changes, the homepage content
-and the exported PDFs both need updating by hand — nothing regenerates
-automatically, so a stale PDF is easy to miss.
+`resume/resume.md` is the source of truth. Nothing regenerates automatically, so
+when it changes, the homepage copy and both PDFs need updating by hand.
+
+The PDFs are Chrome print-to-PDF output (`Producer: Skia/PDF`), A4, with
+background graphics on so the editor chrome in `resume-dev.html` survives.
+`resume.pdf` comes from `resume.md` rendered by a GitHub-flavoured Markdown
+renderer with `resume.css` attached; `resume-dev.pdf` comes from
+`resume-dev.html` directly.
+
+Two things that are easy to get wrong:
+
+- **Turn background graphics on.** Without it `resume-dev.pdf` loses the title
+  bar tint and the three window dots.
+- **`resume-dev.html` needs print scale 0.97 to stay within two pages.** At 100%
+  the InfiGaming block overhangs the first page boundary by about 30px, and
+  `break-inside: avoid` on `.job` pushes the whole block over, cascading the tail
+  onto a third page. The content itself only occupies 1.9 pages. `resume.md`
+  needs no scaling.
+
+To check a PDF actually picked up an edit, look at its link annotations rather
+than the text — the fonts are subsetted with custom encodings, so grepping for
+strings finds nothing even when the text is there:
+
+```sh
+strings resume/resume.pdf | grep -o 'URI (.*)'
+```
 
 ## Deployment
 
