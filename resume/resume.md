@@ -1,5 +1,5 @@
 # Xin Li
-**Sydney, NSW, Australia** | **isphinx@me.com** | **0455 412 054** | [linkedin.com/in/xin-li-a99321108](https://linkedin.com/in/xin-li-a99321108) | [github.com/isphinx](https://github.com/isphinx)
+**Sydney, NSW, Australia** | **isphinx@me.com** | **0455 412 054** | [linkedin.com/in/xin-li-a99321108](https://linkedin.com/in/xin-li-a99321108) | [isphinx.github.io](https://isphinx.github.io)
 
 ---
 
