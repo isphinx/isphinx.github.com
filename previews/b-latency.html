@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xin Li — latency, throughput, reliability</title>
+<meta name="description" content="Xin Li — Full Stack &amp; Systems Software Engineer, Sydney.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#06080b;
+  --panel:#0c1116;
+  --panel-2:#111820;
+  --grid:#16232c;
+  --edge:#1e2d38;
+  --fg:#dae4ea;
+  --dim:#75889a;
+  --ch1:#ffcc33;   /* channel 1 — yellow phosphor */
+  --ch2:#33d9e6;   /* channel 2 — cyan */
+  --ch3:#ff5fa2;   /* channel 3 — magenta */
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--black);color:var(--fg);
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  font-size:13.5px;line-height:1.6;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.disp{font-family:"IBM Plex Sans Condensed","IBM Plex Mono",sans-serif}
+a{color:inherit;text-decoration:none}
+
+/* ---------- crosshair cursor ---------- */
+body.armed{cursor:none}
+.xh{position:fixed;z-index:9000;pointer-events:none;background:rgba(255,204,51,.3)}
+#xh-v{width:1px;top:0;height:100vh}
+#xh-h{height:1px;left:0;width:100vw}
+#xh-dot{
+  position:fixed;z-index:9001;pointer-events:none;width:15px;height:15px;
+  margin:-8px 0 0 -8px;border:1px solid var(--ch1);border-radius:50%;
+  transition:width .16s,height .16s,margin .16s,background .16s;
+}
+#xh-dot.hot{width:30px;height:30px;margin:-15px 0 0 -15px;background:rgba(255,204,51,.12)}
+#readout{
+  position:fixed;z-index:9001;pointer-events:none;
+  font-size:10.5px;letter-spacing:.04em;color:var(--ch1);
+  background:rgba(6,8,11,.82);border:1px solid rgba(255,204,51,.3);
+  padding:2px 6px;transform:translate(14px,14px);white-space:nowrap;
+}
+
+/* ---------- top bar ---------- */
+.bar{
+  position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:0;
+  background:rgba(8,11,15,.9);border-bottom:1px solid var(--edge);backdrop-filter:blur(10px);
+}
+.brand{padding:10px 18px;font-weight:600;letter-spacing:.06em;font-size:12.5px;border-right:1px solid var(--edge)}
+.brand .b{color:var(--ch1)}
+.bar nav{display:flex;overflow-x:auto;scrollbar-width:none}
+.bar nav::-webkit-scrollbar{display:none}
+.bar nav a{
+  padding:10px 16px;font-size:11.5px;letter-spacing:.1em;color:var(--dim);
+  border-right:1px solid var(--edge);transition:color .2s,background .2s;white-space:nowrap;
+}
+.bar nav a:hover{color:var(--ch1);background:var(--panel)}
+.bar nav a.on{color:var(--black);background:var(--ch1)}
+.armed-state{margin-left:auto;display:flex;gap:14px;padding:0 18px;font-size:10.5px;letter-spacing:.08em;color:var(--dim)}
+.armed-state .run{color:var(--ch2)}
+.armed-state .run::before{content:"";display:inline-block;width:5px;height:5px;background:var(--ch2);border-radius:50%;margin-right:6px;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ---------- scope hero ---------- */
+.hero{position:relative;height:min(88vh,760px);min-height:520px;border-bottom:1px solid var(--edge);overflow:hidden}
+#scope{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-fg{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(20px,5vw,64px);pointer-events:none}
+.hero h1{
+  font-size:clamp(52px,11vw,150px);font-weight:700;line-height:.88;letter-spacing:-.02em;
+  margin:0;color:#fff;text-shadow:0 0 60px rgba(0,0,0,.9);
+}
+.hero h1 .w{display:block;overflow:hidden}
+.hero h1 .w i{display:block;font-style:normal;transform:translateY(105%);animation:rise .95s cubic-bezier(.16,1,.3,1) forwards}
+.hero h1 .w:nth-child(2) i{animation-delay:.11s}
+@keyframes rise{to{transform:none}}
+.hero .sub{
+  margin:18px 0 0;max-width:56ch;font-size:clamp(13px,1.5vw,16px);color:var(--fg);
+  opacity:0;animation:fade 1s .5s forwards;
+}
+.hero .sub b{color:var(--ch1);font-weight:500}
+@keyframes fade{to{opacity:1}}
+.hero .role{
+  font-family:"IBM Plex Mono",monospace;font-size:clamp(11px,1.3vw,13px);letter-spacing:.22em;
+  color:var(--ch2);margin:0 0 14px;opacity:0;animation:fade .8s .25s forwards;
+}
+.scope-hud{
+  position:absolute;z-index:3;left:clamp(20px,5vw,64px);bottom:22px;right:clamp(20px,5vw,64px);
+  display:flex;gap:24px;flex-wrap:wrap;font-size:10.5px;letter-spacing:.08em;color:var(--dim);
+  opacity:0;animation:fade 1s .9s forwards;
+}
+.scope-hud b{color:var(--ch1);font-weight:500}
+.scope-hud .c2 b{color:var(--ch2)}
+.nudge{position:absolute;z-index:3;right:clamp(20px,5vw,64px);top:50%;font-size:10.5px;letter-spacing:.14em;color:var(--dim);text-align:right;opacity:0;animation:fade 1s 1.4s forwards}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1140px;margin:0 auto;padding:0 clamp(20px,5vw,64px) 120px}
+section{padding:82px 0 0;scroll-margin-top:44px}
+.head{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--edge);padding-bottom:9px;margin-bottom:26px}
+.head h2{font-size:clamp(22px,3vw,34px);font-weight:700;letter-spacing:-.01em;margin:0}
+.head .idx{font-size:10.5px;letter-spacing:.2em;color:var(--dim)}
+.head .unit{margin-left:auto;font-size:10.5px;letter-spacing:.1em;color:var(--dim)}
+
+/* ---------- skills ---------- */
+.grid{display:grid;gap:1px;background:var(--edge);border:1px solid var(--edge)}
+.cell{background:var(--panel);padding:15px 17px;position:relative;overflow:hidden;transition:background .22s}
+.cell:hover{background:var(--panel-2)}
+.cell::after{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ch1);
+  transform:scaleY(0);transform-origin:bottom;transition:transform .5s cubic-bezier(.2,.9,.2,1);
+}
+.cell.seen::after{transform:none}
+.cell:nth-child(2n)::after{background:var(--ch2)}
+.cell:nth-child(3n)::after{background:var(--ch3)}
+.cell h3{margin:0 0 9px;font-size:12px;letter-spacing:.16em;color:var(--dim);font-weight:600}
+.cell .items{display:flex;flex-wrap:wrap;gap:6px 8px}
+.cell .items span{
+  font-size:12.5px;color:var(--fg);padding:1px 7px;border:1px solid var(--edge);
+  transition:border-color .16s,color .16s,transform .16s;
+}
+.cell .items span:hover{border-color:var(--ch1);color:var(--ch1);transform:translateY(-2px)}
+@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+
+/* ---------- career trace ---------- */
+.trace-box{border:1px solid var(--edge);background:var(--panel);margin-bottom:0}
+#trace{display:block;width:100%;height:132px}
+.trace-legend{display:flex;gap:18px;padding:7px 14px;border-top:1px solid var(--edge);font-size:10.5px;letter-spacing:.08em;color:var(--dim);flex-wrap:wrap}
+.trace-legend b{font-weight:500}
+
+.jobs{border:1px solid var(--edge);border-top:0}
+.job{
+  display:grid;grid-template-columns:118px 1fr;gap:0;
+  border-top:1px solid var(--edge);background:var(--panel);
+  transition:background .2s;
+}
+.job:first-child{border-top:0}
+.job.hot{background:var(--panel-2)}
+.job .when{
+  padding:16px 14px;border-right:1px solid var(--edge);font-size:11px;letter-spacing:.06em;
+  color:var(--dim);background:rgba(0,0,0,.22);
+}
+.job .when .yr{display:block;color:var(--ch1);font-size:14px;letter-spacing:0;margin-bottom:2px}
+.job.hot .when .yr{color:#fff}
+.job .main{padding:16px 20px;min-width:0}
+.job h3{margin:0;font-size:18px;font-weight:600;letter-spacing:-.005em}
+.job h3 .co{color:var(--ch2)}
+.job .where{font-size:11.5px;color:var(--dim);margin-top:2px;letter-spacing:.04em}
+.job .stack{margin-top:9px;font-size:11.5px;color:var(--dim);letter-spacing:.02em}
+.job .stack b{color:var(--ch3);font-weight:500}
+.job ul{list-style:none;margin:11px 0 0;padding:0;
+  max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.2,.9,.2,1),opacity .3s;opacity:.55}
+.job.open ul{max-height:340px;opacity:1}
+.job li{position:relative;padding-left:15px;margin-bottom:6px;max-width:78ch}
+.job li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:1px;background:var(--ch1)}
+.job li b{color:var(--fg);font-weight:600}
+.job .toggle{
+  margin-top:10px;font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+  background:0;border:1px solid var(--edge);padding:4px 10px;font-family:inherit;
+  transition:color .2s,border-color .2s;
+}
+.job .toggle:hover{color:var(--ch1);border-color:var(--ch1)}
+body.armed .job .toggle{cursor:none}
+
+/* ---------- education / contact ---------- */
+.two{display:grid;gap:1px;background:var(--edge);border:1px solid var(--edge)}
+@media (min-width:720px){.two{grid-template-columns:1fr 1fr}}
+.edu{background:var(--panel);padding:18px 20px}
+.edu .deg{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:17px;font-weight:600}
+.edu .sc{color:var(--ch2);font-size:12.5px;margin-top:3px}
+.edu .yr{color:var(--dim);font-size:11px;letter-spacing:.1em;margin-top:6px}
+.cta{margin-top:30px;display:flex;flex-wrap:wrap;gap:1px;background:var(--edge);border:1px solid var(--edge)}
+.cta a{
+  flex:1 1 200px;background:var(--panel);padding:17px 20px;
+  display:flex;flex-direction:column;gap:3px;transition:background .2s,color .2s;
+}
+.cta a:hover{background:var(--ch1);color:var(--black)}
+.cta a .lbl{font-size:10px;letter-spacing:.2em;color:var(--dim)}
+.cta a:hover .lbl{color:rgba(6,8,11,.7)}
+.cta a .val{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:17px;font-weight:600}
+footer{margin-top:64px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  border-top:1px solid var(--edge);padding-top:16px;font-size:10.5px;letter-spacing:.08em;color:var(--dim)}
+
+.rv{opacity:0;transform:translateY(16px)}
+.rv.seen{opacity:1;transform:none;transition:opacity .6s,transform .7s cubic-bezier(.2,.9,.2,1)}
+
+@media (max-width:640px){
+  .job{grid-template-columns:1fr}
+  .job .when{border-right:0;border-bottom:1px solid var(--edge)}
+  .armed-state{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}
+  .rv{opacity:1;transform:none}
+  .hero h1 .w i{transform:none}
+}
+</style>
+</head>
+<body>
+
+<div class="xh" id="xh-v"></div>
+<div class="xh" id="xh-h"></div>
+<div id="xh-dot"></div>
+<div id="readout">—</div>
+
+<div class="bar">
+  <span class="brand">XIN<span class="b">.</span>LI</span>
+  <nav>
+    <a href="#top" class="on">SCOPE</a>
+    <a href="#skills">STACK</a>
+    <a href="#work">TRACE</a>
+    <a href="#education">EDU</a>
+    <a href="#contact">SIGNAL</a>
+  </nav>
+  <div class="armed-state">
+    <span class="run">acquiring</span>
+    <span>SYDNEY / UTC+10</span>
+  </div>
+</div>
+
+<header class="hero" id="top">
+  <canvas id="scope"></canvas>
+  <div class="hero-fg">
+    <p class="role">FULL STACK &amp; SYSTEMS ENGINEER / 15+ YEARS</p>
+    <h1><span class="w"><i>Xin</i></span><span class="w"><i>Li</i></span></h1>
+    <p class="sub">I build software where <b>latency, throughput, and reliability are the product</b> — profiling a hot path in Rust or C++, architecting Go and Node services behind GraphQL and gRPC, then shipping the Next.js front end that consumes them.</p>
+  </div>
+  <div class="scope-hud">
+    <span>CH1 <b id="hudAmp">1.00 V/div</b></span>
+    <span class="c2">TIME <b id="hudTime">2.0 ms/div</b></span>
+    <span>TRIG <b id="hudTrig">AUTO</b></span>
+    <span>SAMPLES <b id="hudN">0</b></span>
+  </div>
+  <p class="nudge">MOVE POINTER TO DRIVE CH1<br>CLICK TO INJECT A TRANSIENT</p>
+</header>
+
+<div class="wrap">
+
+  <section id="skills">
+    <div class="head">
+      <span class="idx">01</span>
+      <h2>Stack</h2>
+      <span class="unit">5 CHANNELS</span>
+    </div>
+    <div class="grid">
+      <div class="cell rv"><h3>LANGUAGES</h3><div class="items" data-items="C/C++, C#, Rust, Go, Python, TypeScript, JavaScript, SQL, Lua, PHP, PL/SQL"></div></div>
+      <div class="cell rv"><h3>FRONTEND</h3><div class="items" data-items="Next.js, React, Tailwind CSS, Shadcn UI, Flutter, HTML5/CSS3"></div></div>
+      <div class="cell rv"><h3>BACKEND</h3><div class="items" data-items=".NET Core, Node.js, PayloadCMS, Keystone.js, GraphQL, REST, gRPC, Protobuf, Gevent"></div></div>
+      <div class="cell rv"><h3>CLOUD &amp; DEVOPS</h3><div class="items" data-items="Kubernetes, Docker, AWS, GCP, CI/CD, Git, Linux"></div></div>
+      <div class="cell rv"><h3>DATA &amp; CACHING</h3><div class="items" data-items="PostgreSQL, MongoDB, MySQL, Oracle, Redis, Memcached"></div></div>
+      <div class="cell rv"><h3>AI-ASSISTED DELIVERY</h3><div class="items" data-items="Claude, Cursor, architecture exploration, large-scale refactoring, test generation"></div></div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="head">
+      <span class="idx">02</span>
+      <h2>Career trace</h2>
+      <span class="unit">2004 → PRESENT</span>
+    </div>
+    <div class="trace-box rv">
+      <canvas id="trace"></canvas>
+      <div class="trace-legend">
+        <span>CH1 <b style="color:var(--ch1)">ROLE SCOPE</b></span>
+        <span>HOVER A ROW TO PLACE CURSORS</span>
+        <span id="traceSel">CURSOR: —</span>
+      </div>
+    </div>
+    <div class="jobs rv" id="jobs">
+
+      <article class="job open" data-from="2026" data-to="2026.7" data-level="6">
+        <div class="when"><span class="yr">2026</span>FEB → NOW<br>SYDNEY AU</div>
+        <div class="main">
+          <h3>Full Stack Software Engineer <span class="co">/ BCR Australia</span></h3>
+          <div class="where">Trading platform · multi-tenant SaaS</div>
+          <div class="stack"><b>stack</b> .NET · C# · Rust · Kubernetes · Docker · CI/CD · Next.js · React · TypeScript · Tailwind</div>
+          <ul>
+            <li><b>SaaS platform evolution.</b> Drove the architectural evolution of legacy .NET monoliths into a high-availability multi-tenant SaaS platform, containerizing core trading services onto Kubernetes.</li>
+            <li><b>Rust performance work.</b> Re-engineered the high-frequency rebate calculation engine in Rust, raising processing throughput and cutting execution latency at peak market activity.</li>
+            <li><b>Trading dashboards.</b> Architected responsive financial dashboards in Next.js and TypeScript with sub-second real-time analytics and order management.</li>
+            <li><b>Delivery.</b> Built the CI/CD pipelines behind microservice deploys, automated tests, and zero-downtime rollouts.</li>
+          </ul>
+          <button class="toggle">COLLAPSE</button>
+        </div>
+      </article>
+
+      <article class="job" data-from="2025.25" data-to="2026" data-level="5">
+        <div class="when"><span class="yr">2025</span>APR → FEB 26<br>HOBART / REMOTE</div>
+        <div class="main">
+          <h3>Senior Full Stack Software Engineer <span class="co">/ InfiGaming</span></h3>
+          <div class="where">High-concurrency iGaming SaaS</div>
+          <div class="stack"><b>stack</b> Go · Kubernetes · gRPC · PSP APIs · Next.js · React · TypeScript · Tailwind</div>
+          <ul>
+            <li><b>Go microservices.</b> Architected scalable low-latency services for a high-concurrency SaaS platform serving global enterprise clients.</li>
+            <li><b>Wallet infrastructure.</b> Built secure multi-tenant portals and core wallet services with real-time balances, multi-currency support, and transaction auditing.</li>
+            <li><b>Payment aggregation.</b> Integrated global PSP APIs for deposits and withdrawals with idempotent processing and security validation.</li>
+            <li><b>Frontends.</b> Shipped modular management portals and consumer-facing interfaces on Next.js.</li>
+          </ul>
+          <button class="toggle">EXPAND</button>
+        </div>
+      </article>
+
+      <article class="job" data-from="2021.2" data-to="2025.25" data-level="4">
+        <div class="when"><span class="yr">2021</span>MAR → APR 25<br>SYDNEY AU</div>
+        <div class="main">
+          <h3>Senior Web Developer <span class="co">/ Media Marketing Group</span></h3>
+          <div class="where">Headless commerce &amp; mobile</div>
+          <div class="stack"><b>stack</b> PayloadCMS · Keystone.js · GraphQL · TypeScript · Next.js · Flutter · PostgreSQL · AWS</div>
+          <ul>
+            <li><b>Headless commerce.</b> Engineered e-commerce backends on PayloadCMS, Keystone.js, GraphQL, PostgreSQL, and MongoDB, integrating logistics and POS APIs (SwiftPOS, Retail Express, Shippit, Sherpa).</li>
+            <li><b>Web and mobile.</b> Shipped responsive web apps in Next.js alongside cross-platform mobile apps in Flutter.</li>
+            <li><b>Cloud.</b> Ran containerized deployments on AWS ECS, EC2, and Lambda with optimized asset delivery.</li>
+          </ul>
+          <button class="toggle">EXPAND</button>
+        </div>
+      </article>
+
+      <article class="job" data-from="2016.2" data-to="2017.2" data-level="3">
+        <div class="when"><span class="yr">2016</span>MAR → MAR 17<br>MANILA PH</div>
+        <div class="main">
+          <h3>C++ / Backend Software Engineer <span class="co">/ Intevalue Services</span></h3>
+          <div class="where">Real-time gaming server engines</div>
+          <div class="stack"><b>stack</b> C++ · Boost · Go · Oracle PL/SQL · Protobuf</div>
+          <ul>
+            <li>Maintained core server engines for high-traffic online gaming platforms, tuning socket connections and data pipelines.</li>
+            <li>Implemented backend APIs in C++/Boost and Go over Oracle PL/SQL for real-time game logic and high-throughput persistence.</li>
+            <li>Designed unified binary network protocols with Protobuf.</li>
+          </ul>
+          <button class="toggle">EXPAND</button>
+        </div>
+      </article>
+
+      <article class="job" data-from="2014.5" data-to="2016.2" data-level="2">
+        <div class="when"><span class="yr">2014</span>JUL → MAR 16<br>BEIJING CN</div>
+        <div class="main">
+          <h3>Python Backend Engineer <span class="co">/ Mobartsgame</span></h3>
+          <div class="where">Mobile game server infrastructure</div>
+          <div class="stack"><b>stack</b> Python · Gevent · Redis · MySQL</div>
+          <ul>
+            <li>Optimized server infrastructure with Python and Gevent coroutines for high-concurrency non-blocking network I/O.</li>
+            <li>Layered Redis over MySQL as an in-memory cache, sharply improving player data retrieval.</li>
+          </ul>
+          <button class="toggle">EXPAND</button>
+        </div>
+      </article>
+
+      <article class="job" data-from="2010" data-to="2014.5" data-level="2">
+        <div class="when"><span class="yr">2010</span>JAN → JUL 14<br>BEIJING CN</div>
+        <div class="main">
+          <h3>C++ Software Engineer <span class="co">/ Dawsome · GAME</span></h3>
+          <div class="where">Distributed RPG server frameworks</div>
+          <div class="stack"><b>stack</b> C++ · Boost.Asio · Lua</div>
+          <ul>
+            <li>Designed distributed RPG server frameworks on C++ and Boost.Asio, routing low-latency packets across server clusters.</li>
+            <li>Embedded Lua scripting engines in C++ cores for dynamic feature updates.</li>
+          </ul>
+          <button class="toggle">EXPAND</button>
+        </div>
+      </article>
+
+      <article class="job" data-from="2004.9" data-to="2007.9" data-level="1">
+        <div class="when"><span class="yr">2004</span>DEC → NOV 07<br>BEIJING CN</div>
+        <div class="main">
+          <h3>Software Engineer <span class="co">/ KongZhong Corporation</span></h3>
+          <div class="where">MMORPG engines &amp; native mobile games</div>
+          <div class="stack"><b>stack</b> C++ · IOCP · Symbian · WinCE · C#</div>
+          <ul>
+            <li>Built and maintained MMORPG server engines on Windows using C++ and I/O Completion Ports.</li>
+            <li>Wrote native mobile action games for Symbian (C++) and WinCE (C#, DirectDraw).</li>
+          </ul>
+          <button class="toggle">EXPAND</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="head">
+      <span class="idx">03</span>
+      <h2>Education</h2>
+      <span class="unit">AU / CN</span>
+    </div>
+    <div class="two rv">
+      <div class="edu">
+        <div class="deg">Master of Information Technology and Systems</div>
+        <div class="sc">University of Tasmania, Australia</div>
+        <div class="yr">COMPLETED 2020</div>
+      </div>
+      <div class="edu">
+        <div class="deg">Bachelor of Computer Science and Technology</div>
+        <div class="sc">Tianjin Normal University, China</div>
+        <div class="yr">COMPLETED 2009</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="head">
+      <span class="idx">04</span>
+      <h2>Signal out</h2>
+      <span class="unit">OPEN TO WORK</span>
+    </div>
+    <p class="rv" style="max-width:62ch;color:var(--dim)">Looking for systems-heavy full stack work in Sydney or remote. Fastest reply is email.</p>
+    <div class="cta rv">
+      <a href="mailto:isphinx@me.com"><span class="lbl">EMAIL</span><span class="val">isphinx@me.com</span></a>
+      <a href="tel:+61455412054"><span class="lbl">PHONE</span><span class="val">0455 412 054</span></a>
+      <a href="https://linkedin.com/in/xin-li-a99321108"><span class="lbl">LINKEDIN</span><span class="val">xin-li</span></a>
+      <a href="../resume/resume.pdf"><span class="lbl">PDF</span><span class="val">Resume</span></a>
+    </div>
+    <footer>
+      <span>XIN LI · SYDNEY NSW AUSTRALIA</span>
+      <span id="footClock">--:--:--</span>
+    </footer>
+  </section>
+</div>
+
+<script>
+(function(){
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const dpr = Math.min(devicePixelRatio || 1, 2);
+
+/* ================= crosshair ================= */
+let mx = innerWidth/2, my = innerHeight*0.5;
+if (fine){
+  document.body.classList.add('armed');
+  const v = document.getElementById('xh-v'), h = document.getElementById('xh-h');
+  const dot = document.getElementById('xh-dot'), ro = document.getElementById('readout');
+  addEventListener('mousemove', e=>{
+    mx = e.clientX; my = e.clientY;
+    v.style.transform = `translateX(${mx}px)`;
+    h.style.transform = `translateY(${my}px)`;
+    dot.style.transform = `translate(${mx}px,${my}px)`;
+    ro.style.transform = `translate(${mx+14}px,${my+14}px)`;
+    const hot = e.target.closest('a,button,.job,.cell');
+    dot.classList.toggle('hot', !!hot);
+    ro.textContent = hot
+      ? (hot.matches('.job') ? 'X: '+(hot.dataset.from||'')+'  MEASURE' : 'SELECT')
+      : `X ${String(mx).padStart(4,'0')}  Y ${String(my).padStart(4,'0')}`;
+  }, {passive:true});
+}
+
+/* ================= hero oscilloscope ================= */
+(function(){
+  const cv = document.getElementById('scope'), g = cv.getContext('2d');
+  let W=0, H=0, n=0, transients=[];
+  function size(){
+    const r = cv.getBoundingClientRect();
+    W = cv.width = Math.max(1, r.width*dpr);
+    H = cv.height = Math.max(1, r.height*dpr);
+  }
+  size(); addEventListener('resize', size);
+
+  cv.parentElement.addEventListener('click', e=>{
+    const r = cv.getBoundingClientRect();
+    transients.push({x:(e.clientX-r.left)/r.width, life:1});
+    if (transients.length > 6) transients.shift();
+  });
+
+  const hudAmp = document.getElementById('hudAmp');
+  const hudTime = document.getElementById('hudTime');
+  const hudN = document.getElementById('hudN');
+
+  function grid(){
+    g.strokeStyle = 'rgba(28,45,56,.9)'; g.lineWidth = 1*dpr;
+    g.beginPath();
+    for (let i=1;i<10;i++){ const x = Math.round(W*i/10)+.5; g.moveTo(x,0); g.lineTo(x,H); }
+    for (let i=1;i<8;i++){ const y = Math.round(H*i/8)+.5; g.moveTo(0,y); g.lineTo(W,y); }
+    g.stroke();
+    /* centre axes with tick marks */
+    g.strokeStyle = 'rgba(48,72,88,.95)';
+    g.beginPath();
+    g.moveTo(0, Math.round(H/2)+.5); g.lineTo(W, Math.round(H/2)+.5);
+    g.moveTo(Math.round(W/2)+.5, 0); g.lineTo(Math.round(W/2)+.5, H);
+    g.stroke();
+    g.strokeStyle = 'rgba(48,72,88,.7)'; g.beginPath();
+    for (let i=1;i<50;i++){ const x=Math.round(W*i/50)+.5; g.moveTo(x,H/2-4*dpr); g.lineTo(x,H/2+4*dpr); }
+    g.stroke();
+  }
+
+  function trace(t, amp, freq, color, phase, width, alpha){
+    g.beginPath();
+    const step = Math.max(1, 2*dpr);
+    for (let px=0; px<=W; px+=step){
+      const u = px/W;
+      let y = Math.sin(u*freq + t + phase) * amp;
+      y += Math.sin(u*freq*2.7 + t*1.6 + phase) * amp*0.22;
+      y += (Math.random()-.5) * amp * 0.05;
+      for (const tr of transients){
+        const d = u - tr.x;
+        y += Math.exp(-(d*d)/0.00035) * Math.sin(d*420) * tr.life * amp * 1.5;
+      }
+      const yy = H/2 - y*H*0.30;
+      px === 0 ? g.moveTo(px,yy) : g.lineTo(px,yy);
+    }
+    g.strokeStyle = color; g.globalAlpha = alpha;
+    g.lineWidth = width*dpr; g.shadowBlur = 14*dpr; g.shadowColor = color;
+    g.stroke();
+    g.shadowBlur = 0; g.globalAlpha = 1;
+  }
+
+  let t = 0, sAmp = .5, sFreq = 18;
+  (function frame(){
+    const tgtAmp  = 0.25 + (1 - Math.min(1, Math.max(0, my/innerHeight))) * 0.95;
+    const tgtFreq = 8 + (mx/innerWidth) * 46;
+    sAmp  += (tgtAmp - sAmp) * .07;
+    sFreq += (tgtFreq - sFreq) * .07;
+    t += reduce ? 0 : 0.045;
+    g.clearRect(0,0,W,H);
+    grid();
+    trace(t*0.6, sAmp*0.42, sFreq*0.55, 'rgba(51,217,230,1)', 2.1, 1, .45);
+    trace(t*0.85, sAmp*0.62, sFreq*1.6, 'rgba(255,95,162,1)', 4.2, 1, .3);
+    trace(t, sAmp, sFreq, 'rgba(255,204,51,1)', 0, 1.7, 1);
+    transients.forEach(tr=>tr.life *= .955);
+    transients = transients.filter(tr=>tr.life > .02);
+    if ((n++ % 8) === 0){
+      hudAmp.textContent = sAmp.toFixed(2) + ' V/div';
+      hudTime.textContent = (60/sFreq).toFixed(2) + ' ms/div';
+      hudN.textContent = (n*128).toLocaleString();
+    }
+    requestAnimationFrame(frame);
+  })();
+})();
+
+/* ================= career trace ================= */
+const jobs = [...document.querySelectorAll('.job')];
+(function(){
+  const cv = document.getElementById('trace'), g = cv.getContext('2d');
+  const Y0 = 2004.5, Y1 = 2027;
+  let W=0,H=0, sel=-1, reveal=0;
+  const segs = jobs.map(j=>({
+    from:+j.dataset.from, to:+j.dataset.to, lvl:+j.dataset.level,
+    label:j.querySelector('h3 .co').textContent.replace('/ ','').trim()
+  }));
+  function size(){
+    const r = cv.getBoundingClientRect();
+    W = cv.width = Math.max(1, r.width*dpr);
+    H = cv.height = Math.max(1, r.height*dpr);
+  }
+  size(); addEventListener('resize', size);
+  const X = y => (y-Y0)/(Y1-Y0)*W;
+  const Y = l => H - 14*dpr - (l/6)*(H-34*dpr);
+
+  function draw(){
+    g.clearRect(0,0,W,H);
+    /* grid + year ticks */
+    g.strokeStyle='rgba(28,45,56,.9)'; g.lineWidth=1*dpr;
+    g.font = `${9.5*dpr}px "IBM Plex Mono", monospace`; g.textAlign='center';
+    g.beginPath();
+    for (let y=2005; y<=2026; y++){
+      const x = Math.round(X(y))+.5;
+      g.moveTo(x, 0); g.lineTo(x, H-16*dpr);
+    }
+    g.stroke();
+    g.fillStyle='rgba(117,136,154,.85)';
+    for (let y=2005; y<=2025; y+=5) g.fillText(String(y), X(y), H-4*dpr);
+
+    /* step waveform */
+    const cut = X(Y0) + (X(Y1)-X(Y0)) * reveal;
+    g.save();
+    g.beginPath(); g.rect(0,0,cut,H); g.clip();
+    g.lineWidth = 2*dpr; g.lineJoin='round';
+    const base = Y(0);
+    const ordered = [...segs].sort((a,b)=>a.from-b.from);
+    g.beginPath(); g.moveTo(0, base);
+    for (const s of ordered){
+      g.lineTo(X(s.from), base); g.lineTo(X(s.from), Y(s.lvl));
+      g.lineTo(X(s.to), Y(s.lvl)); g.lineTo(X(s.to), base);
+    }
+    g.lineTo(W, base);
+    g.strokeStyle='rgba(255,204,51,.95)'; g.shadowBlur=10*dpr; g.shadowColor='rgba(255,204,51,.7)';
+    g.stroke(); g.shadowBlur=0;
+    g.restore();
+
+    /* selection cursors */
+    if (sel >= 0){
+      const s = segs[sel];
+      g.fillStyle = 'rgba(51,217,230,.10)';
+      g.fillRect(X(s.from), 0, X(s.to)-X(s.from), H-16*dpr);
+      g.strokeStyle='rgba(51,217,230,.9)'; g.lineWidth=1*dpr;
+      g.setLineDash([4*dpr, 4*dpr]);
+      g.beginPath();
+      g.moveTo(Math.round(X(s.from))+.5, 0); g.lineTo(Math.round(X(s.from))+.5, H-16*dpr);
+      g.moveTo(Math.round(X(s.to))+.5, 0);   g.lineTo(Math.round(X(s.to))+.5, H-16*dpr);
+      g.stroke(); g.setLineDash([]);
+      g.fillStyle='rgba(51,217,230,1)';
+      g.beginPath(); g.arc(X(s.from), Y(s.lvl), 3.5*dpr, 0, 7); g.fill();
+      g.beginPath(); g.arc(X(s.to), Y(s.lvl), 3.5*dpr, 0, 7); g.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  const selOut = document.getElementById('traceSel');
+  jobs.forEach((j,i)=>{
+    j.addEventListener('mouseenter', ()=>{
+      sel = i; j.classList.add('hot');
+      const s = segs[i];
+      selOut.textContent = `CURSOR: ${s.label} · Δ ${(s.to-s.from).toFixed(1)} yr`;
+    });
+    j.addEventListener('mouseleave', ()=>{ j.classList.remove('hot'); });
+    j.querySelector('.toggle').addEventListener('click', ()=>{
+      const open = j.classList.toggle('open');
+      j.querySelector('.toggle').textContent = open ? 'COLLAPSE' : 'EXPAND';
+    });
+  });
+
+  const tio = new IntersectionObserver(es=>{
+    if (!es[0].isIntersecting) return;
+    if (reduce){ reveal = 1; return; }
+    const t0 = performance.now();
+    (function grow(){
+      const p = Math.min(1, (performance.now()-t0)/1700);
+      reveal = 1 - Math.pow(1-p, 3);
+      if (p < 1) requestAnimationFrame(grow);
+    })();
+    tio.disconnect();
+  }, {threshold:.4});
+  tio.observe(cv);
+})();
+
+/* ================= skills chips ================= */
+document.querySelectorAll('[data-items]').forEach(el=>{
+  el.innerHTML = el.dataset.items.split(', ').map(s=>`<span>${s}</span>`).join('');
+});
+
+/* ================= reveal ================= */
+const io = new IntersectionObserver(es=>{
+  es.forEach((e,i)=>{
+    if (!e.isIntersecting) return;
+    setTimeout(()=>e.target.classList.add('seen'), 60);
+    io.unobserve(e.target);
+  });
+}, {threshold:.15});
+document.querySelectorAll('.rv,.cell').forEach(el=>io.observe(el));
+
+/* ================= nav spy ================= */
+const links = [...document.querySelectorAll('.bar nav a')];
+const spy = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if (!e.isIntersecting) return;
+    links.forEach(a=>a.classList.toggle('on', a.getAttribute('href') === '#'+e.target.id));
+  });
+}, {rootMargin:'-45% 0px -50% 0px'});
+['top','skills','work','education','contact'].forEach(id=>{
+  const el=document.getElementById(id); if (el) spy.observe(el);
+});
+
+/* ================= clock ================= */
+const clock = document.getElementById('footClock');
+setInterval(()=>{
+  clock.textContent = new Date().toLocaleTimeString('en-AU',{timeZone:'Australia/Sydney',hour12:false}) + ' AEST';
+}, 1000);
+})();
+</script>
+</body>
+</html>

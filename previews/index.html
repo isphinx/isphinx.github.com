@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>主页方案预览 — Xin Li</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d12;--panel:#12161f;--edge:#212a38;--fg:#d3dae4;--dim:#77859a;--hi:#e0a049}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:14px;line-height:1.65}
+.wrap{max-width:900px;margin:0 auto;padding:64px 24px 100px}
+h1{font-size:26px;font-weight:700;letter-spacing:-.01em;margin:0 0 6px}
+.lede{color:var(--dim);margin:0 0 36px;max-width:64ch}
+.card{display:block;text-decoration:none;color:inherit;background:var(--panel);
+  border:1px solid var(--edge);padding:20px 22px;margin-bottom:12px;
+  transition:border-color .2s,transform .2s,background .2s}
+.card:hover{border-color:var(--hi);transform:translateY(-2px);background:#161b26}
+.card .k{font-size:11px;letter-spacing:.2em;color:var(--hi)}
+.card h2{font-size:19px;font-weight:700;margin:4px 0 8px}
+.card p{margin:0;color:var(--dim)}
+.card .fx{margin:12px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.card .fx span{font-size:11.5px;border:1px solid var(--edge);padding:1px 7px;color:var(--fg)}
+.note{margin-top:32px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--edge);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>主页方案存档</h1>
+  <p class="lede">重做首页时并行探索的三个方向，内容都来自 <code>resume/resume.md</code>，全部单文件、无构建、无外部依赖（只有 Google Fonts）。最终上线的是<strong>方案 C</strong>，见 <a href="../" style="color:var(--hi)">首页</a>。A 和 B 留作存档。</p>
+
+  <a class="card" href="a-terminal.html">
+    <span class="k">方案 A</span>
+    <h2>深色终端 / 代码编辑器</h2>
+    <p>延续 resume-dev 的「职业即源码」概念，做成一个会开机自检的终端。开场自动敲 <code>whoami</code> → 名字放大浮现，底部提示符可以真的输入命令（help / skills / git log / contact / sudo）。工作经历是 git log 图谱，滚动时轨道逐段点亮。</p>
+    <div class="fx"><span>方块光标 + 反色混合</span><span>飘落字符雨</span><span>鼠标光晕</span><span>打字机开场</span><span>标题乱码解码</span><span>磁吸按钮</span><span>可交互 shell</span></div>
+  </a>
+
+  <a class="card" href="b-latency.html">
+    <span class="k">方案 B</span>
+    <h2>示波器 / 仪表盘</h2>
+    <p>把「latency、throughput、reliability 就是产品本身」直接画出来。首屏是一台示波器：鼠标左右改频率、上下改幅度，点击注入一个瞬态冲击。工作经历是一条 2004→2026 的阶梯波形，鼠标悬停某段经历会在波形上落下测量光标。</p>
+    <div class="fx"><span>十字准线 + 坐标读数</span><span>鼠标驱动波形</span><span>点击注入瞬态</span><span>三通道荧光配色</span><span>职业曲线联动</span><span>经历可展开折叠</span><span>实时 HUD</span></div>
+  </a>
+
+  <a class="card" href="c-engine.html">
+    <span class="k">方案 C · 已上线</span>
+    <h2>游戏引擎调试视口</h2>
+    <p>致敬 C++/Lua 游戏服务器出身。整页跑一个粒子线框球体，鼠标推开粒子、按住吸引、点击放冲击波。鼠标是旋转准星，悬停任何区块会画出引擎风格的调试包围盒和尺寸标注。工作经历做成场景树 + Inspector 面板。</p>
+    <div class="fx"><span>粒子线框场 + 力场</span><span>旋转准星光标</span><span>调试包围盒</span><span>真实 FPS 曲线</span><span>点击冲击波</span><span>名字 RGB 抖动</span><span>场景树 Inspector</span></div>
+  </a>
+
+  <p class="note">提示：三个方案都尊重 <code>prefers-reduced-motion</code>，触屏设备自动关闭自定义光标。方案 A/B/C 里的「下载简历」都指向 <code>../resume/resume.pdf</code>。</p>
+</div>
+</body>
+</html>
