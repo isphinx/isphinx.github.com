@@ -1,0 +1,268 @@
+/* resume-dev — "career as source file" theme */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  --bg:        #ffffff;
+  --bg-panel:  #eef0f4;
+  --border:    #d7dbe3;
+  --fg:        #232733;
+  --fg-dim:    #6e7683;
+  --gold:      #a5670a;
+  --green:     #1f7a4d;
+  --blue:      #1c5fd1;
+  --violet:    #7a3fd1;
+  --red-dot:   #ff5f56;
+  --amber-dot: #ffbd2e;
+  --green-dot: #27c93f;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--fg);
+  font-size: 9pt;
+  line-height: 1.46;
+  -webkit-font-smoothing: antialiased;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0, "dlig" 0, "hlig" 0;
+}
+
+.page-pad {
+  padding: 13mm 15mm 10mm 15mm;
+}
+
+/* ---------- window chrome ---------- */
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 15mm;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.dots { display: flex; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; }
+.dot.red   { background: var(--red-dot); }
+.dot.amber { background: var(--amber-dot); }
+.dot.green { background: var(--green-dot); }
+
+.tab {
+  font-size: 8.3pt;
+  color: var(--fg-dim);
+  border-bottom: 1.5px solid var(--gold);
+  padding-bottom: 9px;
+  margin-bottom: -10px;
+}
+.tab b { color: var(--fg); font-weight: 500; }
+
+.statusbits {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  font-size: 7.6pt;
+  color: var(--fg-dim);
+}
+
+/* ---------- comments / section markers ---------- */
+
+.c {
+  color: var(--fg-dim);
+  font-style: italic;
+}
+
+.section {
+  margin-top: 15px;
+}
+.section:first-of-type { margin-top: 4px; }
+
+.section-tag {
+  color: var(--violet);
+  font-style: italic;
+  font-size: 9.3pt;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ---------- header ---------- */
+
+.hero { margin-bottom: 4px; }
+.hero .name {
+  font-size: 23pt;
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.hero .name .punct { color: var(--fg-dim); font-weight: 400; }
+.hero .role {
+  font-size: 11pt;
+  color: var(--gold);
+  font-weight: 500;
+  margin-top: 4px;
+}
+.hero .contact {
+  margin-top: 8px;
+  color: var(--fg-dim);
+  font-style: italic;
+  font-size: 8.6pt;
+}
+.hero .contact a { color: var(--fg-dim); text-decoration: none; border-bottom: 1px dotted var(--border); }
+
+/* ---------- summary ---------- */
+
+.summary p {
+  margin: 0;
+  max-width: 165mm;
+  color: var(--fg);
+}
+
+/* ---------- skills (map literal) ---------- */
+
+.codeblock {
+  font-size: 9pt;
+  color: var(--fg);
+}
+.kw { color: var(--blue); }
+.punct { color: var(--fg-dim); }
+.skillmap { margin-top: 2px; }
+.skillrow {
+  display: flex;
+  padding: 2px 0;
+}
+.skillrow .key {
+  flex: 0 0 96px;
+  color: var(--gold);
+}
+.skillrow .val {
+  color: var(--fg);
+}
+.skillrow .val .q { color: var(--border); }
+.skillrow .val .sep { color: var(--fg-dim); }
+
+/* ---------- work experience: git graph timeline ---------- */
+
+.timeline { margin-top: 4px; }
+
+.job {
+  display: flex;
+  gap: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.rail {
+  flex: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.rail .dot-node {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--gold);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.rail .rail-line {
+  flex: 1;
+  width: 2px;
+  background: var(--border);
+  margin-top: 2px;
+}
+.job:last-child .rail .rail-line { display: none; }
+
+.job .content {
+  flex: 1;
+  padding-bottom: 13px;
+  min-width: 0;
+}
+
+.job .title-line {
+  font-size: 9.8pt;
+}
+.job .role { color: var(--gold); font-weight: 600; }
+.job .at { color: var(--fg-dim); }
+.job .company { color: var(--green); font-weight: 600; }
+
+.job .meta {
+  color: var(--fg-dim);
+  font-style: italic;
+  font-size: 8.5pt;
+  margin-top: 2px;
+}
+
+.job .stack {
+  color: var(--fg-dim);
+  font-size: 8.3pt;
+  margin-top: 3px;
+}
+.job .stack .lbl { color: var(--violet); font-style: italic; }
+.job .stack .val { color: var(--blue); }
+
+.job ul {
+  list-style: none;
+  margin: 8px 0 0 0;
+  padding: 0;
+}
+.job li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 5px;
+  color: var(--fg);
+}
+.job li::before {
+  content: "-";
+  position: absolute;
+  left: 0;
+  color: var(--fg-dim);
+}
+.job li b { color: var(--violet); font-weight: 600; }
+
+/* ---------- education ---------- */
+
+.edu-item {
+  margin-bottom: 6px;
+  color: var(--fg);
+}
+.edu-item .degree { color: var(--gold); font-weight: 600; }
+.edu-item .sep { color: var(--fg-dim); }
+.edu-item .school { color: var(--green); }
+.edu-item .year { color: var(--fg-dim); }
+
+/* ---------- footer wink ---------- */
+
+.footer {
+  margin-top: 26px;
+  color: var(--fg-dim);
+  font-size: 8.6pt;
+}
+.footer .prompt { color: var(--fg-dim); }
+.footer .prompt .user { color: var(--green); }
+.footer .prompt .host { color: var(--blue); }
+.footer .result { color: var(--green); font-weight: 600; }
+
+hr.rule {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0 0 0;
+}

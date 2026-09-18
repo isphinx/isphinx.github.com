@@ -1,97 +1,732 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=640">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xin Li — Full Stack &amp; Systems Engineer, Sydney</title>
+<meta name="description" content="Xin Li, full stack and systems software engineer in Sydney. Fifteen years across Rust, C++, Go, .NET, and Next.js, building software where latency, throughput, and reliability are the product.">
+<link rel="canonical" href="https://isphinx.github.io/">
+<meta name="theme-color" content="#05070c">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="https://isphinx.github.io/">
+<meta property="og:title" content="Xin Li — Full Stack &amp; Systems Engineer, Sydney">
+<meta property="og:description" content="Fifteen years building software where latency, throughput, and reliability are the product — Rust, C++, Go, .NET, and Next.js.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070c'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%234de1ff' stroke-width='1.5' stroke-dasharray='4 6'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23ff8a3d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#05070c;
+  --panel:rgba(12,17,26,.78);
+  --panel-solid:#0b111a;
+  --edge:#1c2735;
+  --edge-lit:#2b3d52;
+  --fg:#d7e0ea;
+  --dim:#6e8299;
+  --wire:#4de1ff;   /* wireframe cyan */
+  --sel:#ff8a3d;    /* selection orange */
+  --giz:#78f08a;    /* gizmo green */
+  --warn:#ffd24a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--void);color:var(--fg);
+  font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  font-size:13px;line-height:1.62;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.disp{font-family:"Chakra Petch","JetBrains Mono",sans-serif}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
 
-    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
-    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+/* ---------- viewport bg ---------- */
+#field{position:fixed;inset:0;z-index:0}
+.grade{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(120% 80% at 50% 0%,transparent 40%,rgba(5,7,12,.9) 100%)}
 
-    <script type="text/javascript" src="javascripts/modernizr.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function () {
-        $('#main_content').headsmart()
-      })
-    </script>
-    <title>Isphinx.github.com by isphinx</title>
-  </head>
+/* ---------- reticle cursor ---------- */
+body.armed{cursor:none}
+#ret{position:fixed;z-index:9000;pointer-events:none;width:46px;height:46px;margin:-23px 0 0 -23px}
+#ret svg{display:block;width:100%;height:100%;transition:transform .3s}
+#ret .ring{animation:spin 7s linear infinite;transform-origin:50% 50%}
+#ret .core{transition:r .18s}
+@keyframes spin{to{transform:rotate(360deg)}}
+#ret.hot svg{transform:scale(1.3)}
+#ret-tag{
+  position:fixed;z-index:9001;pointer-events:none;font-size:10px;letter-spacing:.08em;
+  color:var(--giz);background:rgba(5,7,12,.85);border:1px solid rgba(120,240,138,.35);
+  padding:1px 5px;transform:translate(22px,16px);white-space:nowrap;opacity:0;transition:opacity .2s;
+}
+#ret-tag.on{opacity:1}
+.shock{position:fixed;z-index:8999;pointer-events:none;border:1px solid var(--wire);border-radius:50%;
+  width:10px;height:10px;margin:-5px 0 0 -5px}
 
-  <body>
-    <a id="forkme_banner" href="https://github.com/isphinx">View on GitHub</a>
-    <div class="shell">
+/* ---------- debug bbox ---------- */
+#bbox{position:fixed;z-index:8000;pointer-events:none;opacity:0;
+  transition:opacity .18s,transform .16s cubic-bezier(.2,.9,.2,1),width .16s,height .16s}
+#bbox.on{opacity:1}
+#bbox .cnr{position:absolute;width:9px;height:9px;border:1.5px solid var(--sel)}
+#bbox .tl{left:-1px;top:-1px;border-right:0;border-bottom:0}
+#bbox .tr{right:-1px;top:-1px;border-left:0;border-bottom:0}
+#bbox .bl{left:-1px;bottom:-1px;border-right:0;border-top:0}
+#bbox .br{right:-1px;bottom:-1px;border-left:0;border-top:0}
+#bbox .dim{position:absolute;left:0;top:-17px;font-size:9.5px;letter-spacing:.06em;color:var(--sel);white-space:nowrap}
 
-      <header>
-        <span class="ribbon-outer">
-          <span class="ribbon-inner">
-            <h1>Isphinx.github.com</h1>
-            <h2></h2>
-          </span>
-          <span class="left-tail"></span>
-          <span class="right-tail"></span>
-        </span>
-      </header>
+/* ---------- HUD ---------- */
+.hud{position:fixed;z-index:60;font-size:10px;letter-spacing:.09em;color:var(--dim);pointer-events:none}
+.hud b{color:var(--giz);font-weight:500}
+#hud-perf{left:14px;top:12px;display:flex;align-items:center;gap:9px}
+#fps{display:block;width:74px;height:22px;border:1px solid var(--edge);background:rgba(5,7,12,.6)}
+#hud-build{right:14px;top:12px;text-align:right}
+@media (max-width:760px){.hud{display:none}}
 
-      <div id="no-downloads">
-        <span class="inner">
-        </span>
+/* ---------- nav ---------- */
+.nav{
+  position:fixed;z-index:70;left:50%;transform:translateX(-50%);bottom:18px;
+  display:flex;gap:1px;background:var(--edge);border:1px solid var(--edge);
+  backdrop-filter:blur(10px);
+}
+.nav a{
+  background:rgba(8,12,19,.86);padding:8px 14px;font-size:10.5px;letter-spacing:.14em;color:var(--dim);
+  transition:color .2s,background .2s;
+}
+.nav a:hover{color:var(--wire)}
+.nav a.on{color:var(--void);background:var(--wire)}
+body.armed .nav a{cursor:none}
+@media (max-width:560px){
+  .nav{left:8px;right:8px;bottom:8px;transform:none;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav a{flex:0 0 auto;padding:8px 11px;letter-spacing:.1em}
+}
+
+/* ---------- hero ---------- */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:0 clamp(20px,6vw,90px)}
+.tagline{font-size:10.5px;letter-spacing:.3em;color:var(--wire);margin:0 0 16px;
+  opacity:0;animation:fade .7s .2s forwards}
+@keyframes fade{to{opacity:1}}
+.hero h1{
+  margin:0;font-weight:700;font-size:clamp(58px,13vw,178px);line-height:.84;letter-spacing:-.03em;color:#fff;
+  position:relative;display:inline-block;
+}
+.hero h1 span{display:block;overflow:hidden}
+.hero h1 span i{display:block;font-style:normal;transform:translateY(110%);animation:rise 1s cubic-bezier(.16,1,.3,1) forwards}
+.hero h1 span:nth-child(2) i{animation-delay:.1s}
+@keyframes rise{to{transform:none}}
+.hero h1.glitch::before,.hero h1.glitch::after{
+  content:attr(data-t);position:absolute;inset:0;pointer-events:none;
+  font:inherit;letter-spacing:inherit;line-height:.84;white-space:pre;
+}
+.hero h1.glitch::before{color:var(--wire);transform:translate(-3px,1px);opacity:.75;mix-blend-mode:screen}
+.hero h1.glitch::after{color:var(--sel);transform:translate(3px,-1px);opacity:.75;mix-blend-mode:screen}
+.hero .role{
+  font-family:"Chakra Petch",sans-serif;font-size:clamp(17px,2.6vw,30px);font-weight:600;
+  color:var(--sel);margin:18px 0 0;opacity:0;animation:fade .8s .55s forwards;
+}
+.hero .blurb{max-width:58ch;margin:16px 0 0;color:var(--fg);opacity:0;animation:fade .8s .75s forwards}
+.hero .blurb b{color:var(--wire);font-weight:500}
+.hero .hint{margin:26px 0 0;font-size:10.5px;letter-spacing:.14em;color:var(--dim);opacity:0;animation:fade .8s 1.1s forwards}
+
+/* ---------- sections ---------- */
+main{position:relative;z-index:10}
+section{padding:96px clamp(20px,6vw,90px) 0;scroll-margin-top:20px;max-width:1360px;margin:0 auto}
+.shead{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+.shead .n{font-size:10.5px;letter-spacing:.2em;color:var(--wire)}
+.shead h2{margin:0;font-size:clamp(24px,3.6vw,44px);font-weight:700;letter-spacing:-.015em}
+.shead .meta{margin-left:auto;font-size:10.5px;letter-spacing:.1em;color:var(--dim)}
+
+/* components grid */
+.comps{display:grid;gap:10px}
+@media (min-width:780px){.comps{grid-template-columns:repeat(3,1fr)}}
+.comp{
+  background:var(--panel);border:1px solid var(--edge);padding:14px 16px;
+  backdrop-filter:blur(6px);transition:border-color .22s,transform .22s,background .22s;
+}
+.comp:hover{border-color:var(--wire);transform:translateY(-3px)}
+.comp .top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.comp .cb{width:12px;height:12px;border:1px solid var(--giz);position:relative;flex:0 0 auto}
+.comp .cb::after{content:"";position:absolute;inset:2px;background:var(--giz);
+  transform:scale(0);transition:transform .3s cubic-bezier(.2,1.6,.4,1)}
+.comp.seen .cb::after{transform:scale(1)}
+.comp h3{margin:0;font-size:13px;letter-spacing:.1em;font-weight:600;color:var(--fg)}
+.comp ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px 6px}
+.comp li{font-size:12px;color:var(--dim);border:1px solid var(--edge);padding:0 6px;
+  transition:color .16s,border-color .16s}
+.comp li:hover{color:var(--wire);border-color:var(--edge-lit)}
+
+/* scene hierarchy + inspector */
+.scene{display:grid;gap:10px;align-items:start}
+@media (min-width:920px){.scene{grid-template-columns:330px 1fr}}
+.hier{background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(6px)}
+.hier .cap,.insp .cap{
+  padding:8px 13px;border-bottom:1px solid var(--edge);font-size:10px;letter-spacing:.18em;color:var(--dim);
+  background:rgba(0,0,0,.28);display:flex;justify-content:space-between;
+}
+.ent{
+  display:block;width:100%;text-align:left;background:0;border:0;border-bottom:1px solid var(--edge);
+  padding:10px 13px 10px 26px;color:var(--dim);position:relative;font-size:12.5px;
+  transition:background .18s,color .18s;
+}
+.ent:last-child{border-bottom:0}
+.ent::before{content:"▸";position:absolute;left:11px;color:var(--edge-lit);transition:color .18s,transform .18s}
+.ent:hover{background:rgba(77,225,255,.07);color:var(--fg)}
+.ent.on{background:rgba(255,138,61,.12);color:#fff}
+.ent.on::before{content:"▾";color:var(--sel)}
+.ent .yr{float:right;font-size:10.5px;color:var(--dim);letter-spacing:.06em}
+.ent.on .yr{color:var(--sel)}
+.ent .nm{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:14px;letter-spacing:.01em}
+body.armed .ent{cursor:none}
+
+.insp{background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(6px);min-height:420px}
+.insp .pad{padding:18px 22px}
+.insp h3{margin:0;font-size:clamp(19px,2.4vw,27px);font-weight:700;letter-spacing:-.01em}
+.insp .co{color:var(--sel)}
+.insp .loc{font-size:11.5px;color:var(--dim);letter-spacing:.06em;margin-top:3px}
+.prop{display:grid;grid-template-columns:104px 1fr;gap:4px 14px;margin-top:16px;
+  border-top:1px solid var(--edge);padding-top:14px;font-size:12.5px}
+.prop dt{color:var(--dim);letter-spacing:.06em}
+.prop dd{margin:0;color:var(--fg)}
+.prop dd.wire{color:var(--wire)}
+.insp ul{list-style:none;margin:16px 0 0;padding:0;border-top:1px solid var(--edge);padding-top:14px}
+.insp li{position:relative;padding-left:18px;margin-bottom:8px;max-width:76ch}
+.insp li::before{content:"■";position:absolute;left:0;font-size:8px;top:.35em;color:var(--giz)}
+.insp li b{color:#fff;font-weight:600}
+.fade-in{animation:swap .34s cubic-bezier(.2,.9,.2,1)}
+@keyframes swap{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+
+/* assets + network */
+.assets{display:grid;gap:10px}
+@media (min-width:780px){.assets{grid-template-columns:1fr 1fr}}
+.asset{background:var(--panel);border:1px solid var(--edge);padding:17px 19px;backdrop-filter:blur(6px);
+  transition:border-color .2s}
+.asset:hover{border-color:var(--giz)}
+.asset .d{font-family:"Chakra Petch",sans-serif;font-size:18px;font-weight:600}
+.asset .s{color:var(--wire);font-size:12.5px;margin-top:3px}
+.asset .y{color:var(--dim);font-size:10.5px;letter-spacing:.14em;margin-top:8px}
+.net{display:grid;gap:10px;margin-top:4px}
+@media (min-width:640px){.net{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}}
+.sock{
+  background:var(--panel);border:1px solid var(--edge);padding:16px 18px;backdrop-filter:blur(6px);
+  display:flex;flex-direction:column;gap:3px;transition:background .2s,border-color .2s,transform .2s;
+}
+.sock:hover{border-color:var(--wire);background:rgba(77,225,255,.1);transform:translateY(-3px)}
+.sock .k{font-size:10px;letter-spacing:.2em;color:var(--dim)}
+.sock .v{font-family:"Chakra Petch",sans-serif;font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.sock .st{font-size:10px;letter-spacing:.1em;color:var(--giz);margin-top:5px}
+footer{max-width:1360px;margin:0 auto;padding:60px clamp(20px,6vw,90px) 110px;
+  display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  font-size:10.5px;letter-spacing:.09em;color:var(--dim)}
+
+.rv{opacity:0;transform:translateY(18px)}
+.rv.seen{opacity:1;transform:none;transition:opacity .6s,transform .7s cubic-bezier(.2,.9,.2,1)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}
+  .rv{opacity:1;transform:none}
+  .hero h1 span i{transform:none}
+  #field{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="field"></canvas>
+<div class="grade"></div>
+
+<div id="ret">
+  <svg viewBox="0 0 46 46" fill="none">
+    <g class="ring" stroke="#4de1ff" stroke-width="1" opacity=".8">
+      <circle cx="23" cy="23" r="16" stroke-dasharray="6 9"/>
+    </g>
+    <path d="M23 6v7M23 33v7M6 23h7M33 23h7" stroke="#4de1ff" stroke-width="1"/>
+    <circle class="core" cx="23" cy="23" r="2" fill="#ff8a3d"/>
+  </svg>
+</div>
+<div id="ret-tag">—</div>
+<div id="bbox"><i class="cnr tl"></i><i class="cnr tr"></i><i class="cnr bl"></i><i class="cnr br"></i><span class="dim"></span></div>
+
+<div class="hud" id="hud-perf">
+  <canvas id="fps"></canvas>
+  <span><b id="fpsN">60</b> fps · <b id="msN">16.6</b> ms</span>
+</div>
+<div class="hud" id="hud-build">
+  <div>BUILD <b>xin-li / release</b></div>
+  <div>ENTITIES <b id="entN">7</b> · SYDNEY UTC+10</div>
+</div>
+
+<nav class="nav">
+  <a href="#top" class="on">VIEWPORT</a>
+  <a href="#components">COMPONENTS</a>
+  <a href="#scene">SCENE</a>
+  <a href="#assets">ASSETS</a>
+  <a href="#network">NETWORK</a>
+</nav>
+
+<header class="hero" id="top">
+  <p class="tagline">RUNTIME · 15 YEARS UPTIME · SYDNEY NSW</p>
+  <h1 id="bigname" data-t="Xin&#10;Li"><span><i>Xin</i></span><span><i>Li</i></span></h1>
+  <p class="role">Full Stack &amp; Systems Engineer</p>
+  <p class="blurb">Fifteen years building software where <b>latency, throughput, and reliability are the product</b> — from C++ game server cores and Rust hot paths to Go services and the Next.js front ends that consume them.</p>
+  <p class="hint">MOVE POINTER TO DISTURB THE FIELD · CLICK FOR AN IMPULSE · HOLD TO PULL</p>
+</header>
+
+<main>
+  <section id="components">
+    <div class="shead"><span class="n">01</span><h2>Components</h2><span class="meta">6 ENABLED</span></div>
+    <div class="comps">
+      <div class="comp rv" data-entity="LanguageComponent">
+        <div class="top"><span class="cb"></span><h3>LANGUAGES</h3></div>
+        <ul data-items="C/C++, C#, Rust, Go, Python, TypeScript, JavaScript, SQL, Lua, PHP, PL/SQL"></ul>
       </div>
-
-
-      <span class="banner-fix"></span>
-
-
-      <section id="main_content">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-
-      <footer>
-        <span class="ribbon-outer">
-          <span class="ribbon-inner">
-            <p>Projects by <a href="https://github.com/isphinx">isphinx</a> can be found on <a href="https://github.com/isphinx">GitHub</a></p>
-          </span>
-          <span class="left-tail"></span>
-          <span class="right-tail"></span>
-        </span>
-        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
-        <span class="octocat"></span>
-      </footer>
-
+      <div class="comp rv" data-entity="FrontendComponent">
+        <div class="top"><span class="cb"></span><h3>FRONTEND</h3></div>
+        <ul data-items="Next.js, React, Tailwind CSS, Shadcn UI, Flutter, HTML5/CSS3"></ul>
+      </div>
+      <div class="comp rv" data-entity="BackendComponent">
+        <div class="top"><span class="cb"></span><h3>BACKEND</h3></div>
+        <ul data-items=".NET Core, Node.js, PayloadCMS, Keystone.js, GraphQL, REST, gRPC, Protobuf, Gevent"></ul>
+      </div>
+      <div class="comp rv" data-entity="CloudComponent">
+        <div class="top"><span class="cb"></span><h3>CLOUD &amp; DEVOPS</h3></div>
+        <ul data-items="Kubernetes, Docker, AWS, GCP, CI/CD, Git, Linux"></ul>
+      </div>
+      <div class="comp rv" data-entity="DataComponent">
+        <div class="top"><span class="cb"></span><h3>DATA &amp; CACHING</h3></div>
+        <ul data-items="PostgreSQL, MongoDB, MySQL, Oracle, Redis, Memcached"></ul>
+      </div>
+      <div class="comp rv" data-entity="AIComponent">
+        <div class="top"><span class="cb"></span><h3>AI-ASSISTED DELIVERY</h3></div>
+        <ul data-items="Claude, Cursor, architecture exploration, large-scale refactoring, test generation"></ul>
+      </div>
     </div>
+  </section>
 
-    
-  </body>
+  <section id="scene">
+    <div class="shead"><span class="n">02</span><h2>Scene hierarchy</h2><span class="meta">SELECT AN ENTITY</span></div>
+    <div class="scene">
+      <div class="hier rv">
+        <div class="cap"><span>HIERARCHY</span><span>2004 → NOW</span></div>
+        <div id="entList"></div>
+      </div>
+      <div class="insp rv" data-entity="Inspector">
+        <div class="cap"><span>INSPECTOR</span><span id="inspTag">—</span></div>
+        <div class="pad" id="inspBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="assets">
+    <div class="shead"><span class="n">03</span><h2>Assets</h2><span class="meta">EDUCATION</span></div>
+    <div class="assets">
+      <div class="asset rv" data-entity="Masters">
+        <div class="d">Master of Information Technology and Systems</div>
+        <div class="s">University of Tasmania, Australia</div>
+        <div class="y">LOADED 2020</div>
+      </div>
+      <div class="asset rv" data-entity="Bachelors">
+        <div class="d">Bachelor of Computer Science and Technology</div>
+        <div class="s">Tianjin Normal University, China</div>
+        <div class="y">LOADED 2009</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="network">
+    <div class="shead"><span class="n">04</span><h2>Network</h2><span class="meta">LISTENING</span></div>
+    <p class="rv" style="max-width:60ch;color:var(--dim);margin-top:0">Open to systems-heavy full stack work in Sydney or remote. Email gets the fastest reply.</p>
+    <div class="net">
+      <a class="sock rv" href="mailto:isphinx@me.com"><span class="k">EMAIL</span><span class="v">isphinx@me.com</span><span class="st">OPEN</span></a>
+      <a class="sock rv" href="tel:+61455412054"><span class="k">PHONE</span><span class="v">0455 412 054</span><span class="st">OPEN</span></a>
+      <a class="sock rv" href="https://github.com/isphinx"><span class="k">GITHUB</span><span class="v">github.com/isphinx</span><span class="st">OPEN</span></a>
+      <a class="sock rv" href="https://linkedin.com/in/xin-li-a99321108"><span class="k">LINKEDIN</span><span class="v">linkedin.com/in/xin-li</span><span class="st">OPEN</span></a>
+      <a class="sock rv" href="resume/resume.pdf"><span class="k">RESUME</span><span class="v">PDF download</span><span class="st">OPEN</span></a>
+    </div>
+  </section>
+
+  <footer>
+    <span>XIN LI · FULL STACK &amp; SYSTEMS ENGINEER · SYDNEY NSW AUSTRALIA</span>
+    <span id="clock">--:--:--</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const dpr = Math.min(devicePixelRatio || 1, 2);
+
+/* ================= data ================= */
+const ENTITIES = [
+  {
+    id:'BCRAustralia', name:'BCR Australia', role:'Full Stack Software Engineer',
+    years:'2026', span:'Feb 2026 – present', loc:'Sydney, Australia',
+    domain:'Trading platform · multi-tenant SaaS',
+    stack:'.NET · C# · Rust · Kubernetes · Docker · CI/CD · Next.js · React · TypeScript · Tailwind',
+    items:[
+      ['SaaS platform evolution.','Drove the architectural evolution of legacy .NET monoliths into a high-availability multi-tenant SaaS platform, containerizing core trading services onto Kubernetes.'],
+      ['Rust performance work.','Re-engineered the high-frequency rebate calculation engine in Rust, raising processing throughput and cutting execution latency at peak market activity.'],
+      ['Trading dashboards.','Architected responsive financial dashboards in Next.js and TypeScript with sub-second real-time analytics and order management.'],
+      ['Delivery.','Built the CI/CD pipelines behind microservice deploys, automated tests, and zero-downtime rollouts.']
+    ]
+  },
+  {
+    id:'InfiGaming', name:'InfiGaming', role:'Senior Full Stack Software Engineer',
+    years:'2025', span:'Apr 2025 – Feb 2026', loc:'Hobart / remote, Australia',
+    domain:'High-concurrency iGaming SaaS',
+    stack:'Go · Kubernetes · gRPC · PSP APIs · Next.js · React · TypeScript · Tailwind',
+    items:[
+      ['Go microservices.','Architected scalable low-latency services for a high-concurrency SaaS platform serving global enterprise clients.'],
+      ['Wallet infrastructure.','Built secure multi-tenant portals and core wallet services with real-time balances, multi-currency support, and transaction auditing.'],
+      ['Payment aggregation.','Integrated global PSP APIs for deposits and withdrawals with idempotent processing and security validation.'],
+      ['Frontends.','Shipped modular management portals and consumer-facing interfaces on Next.js.']
+    ]
+  },
+  {
+    id:'MediaMarketingGroup', name:'Media Marketing Group', role:'Senior Web Developer',
+    years:'2021', span:'Mar 2021 – Apr 2025', loc:'Sydney, Australia',
+    domain:'Headless commerce &amp; mobile',
+    stack:'PayloadCMS · Keystone.js · GraphQL · TypeScript · Next.js · Flutter · PostgreSQL · AWS',
+    items:[
+      ['Headless commerce.','Engineered e-commerce backends on PayloadCMS, Keystone.js, GraphQL, PostgreSQL, and MongoDB, integrating logistics and POS APIs (SwiftPOS, Retail Express, Shippit, Sherpa).'],
+      ['Web and mobile.','Shipped responsive web apps in Next.js alongside cross-platform mobile apps in Flutter.'],
+      ['Cloud.','Ran containerized deployments on AWS ECS, EC2, and Lambda with optimized asset delivery.']
+    ]
+  },
+  {
+    id:'IntevalueServices', name:'Intevalue Services', role:'C++ / Backend Software Engineer',
+    years:'2016', span:'Mar 2016 – Mar 2017', loc:'Manila, Philippines',
+    domain:'Real-time gaming server engines',
+    stack:'C++ · Boost · Go · Oracle PL/SQL · Protobuf',
+    items:[
+      ['','Maintained core server engines for high-traffic online gaming platforms, tuning socket connections and data pipelines.'],
+      ['','Implemented backend APIs in C++/Boost and Go over Oracle PL/SQL for real-time game logic and high-throughput persistence.'],
+      ['','Designed unified binary network protocols with Protobuf.']
+    ]
+  },
+  {
+    id:'Mobartsgame', name:'Mobartsgame', role:'Python Backend Engineer',
+    years:'2014', span:'Jul 2014 – Mar 2016', loc:'Beijing, China',
+    domain:'Mobile game server infrastructure',
+    stack:'Python · Gevent · Redis · MySQL',
+    items:[
+      ['','Optimized server infrastructure with Python and Gevent coroutines for high-concurrency non-blocking network I/O.'],
+      ['','Layered Redis over MySQL as an in-memory cache, sharply improving player data retrieval.']
+    ]
+  },
+  {
+    id:'Dawsome', name:'Dawsome · GAME', role:'C++ Software Engineer',
+    years:'2010', span:'Jan 2010 – Jul 2014', loc:'Beijing, China',
+    domain:'Distributed RPG server frameworks',
+    stack:'C++ · Boost.Asio · Lua',
+    items:[
+      ['','Designed distributed RPG server frameworks on C++ and Boost.Asio, routing low-latency packets across server clusters.'],
+      ['','Embedded Lua scripting engines in C++ cores for dynamic feature updates.']
+    ]
+  },
+  {
+    id:'KongZhong', name:'KongZhong Corporation', role:'Software Engineer',
+    years:'2004', span:'Dec 2004 – Nov 2007', loc:'Beijing, China',
+    domain:'MMORPG engines &amp; native mobile games',
+    stack:'C++ · IOCP · Symbian · WinCE · C#',
+    items:[
+      ['','Built and maintained MMORPG server engines on Windows using C++ and I/O Completion Ports.'],
+      ['','Wrote native mobile action games for Symbian (C++) and WinCE (C#, DirectDraw).']
+    ]
+  }
+];
+
+/* ================= particle field ================= */
+let mx = innerWidth/2, my = innerHeight/2, holding = false;
+if (!reduce){
+  const cv = document.getElementById('field'), g = cv.getContext('2d');
+  let W=0,H=0,N=0;
+  const P = [];
+  const COUNT = innerWidth < 760 ? 70 : 150;
+  const LINK = innerWidth < 760 ? 92 : 118;
+
+  function build(){
+    P.length = 0;
+    for (let i=0;i<COUNT;i++){
+      /* fibonacci sphere → gives an even shell, reads as a wireframe volume */
+      const k = i + .5;
+      const phi = Math.acos(1 - 2*k/COUNT);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * k;
+      P.push({
+        bx: Math.cos(theta)*Math.sin(phi),
+        by: Math.sin(theta)*Math.sin(phi),
+        bz: Math.cos(phi),
+        ox:0, oy:0, vx:0, vy:0, sx:0, sy:0, sc:1
+      });
+    }
+  }
+  function size(){
+    W = cv.width = innerWidth*dpr; H = cv.height = innerHeight*dpr;
+    cv.style.width = innerWidth+'px'; cv.style.height = innerHeight+'px';
+  }
+  build(); size();
+  addEventListener('resize', ()=>{ size(); });
+
+  addEventListener('mousemove', e=>{ mx = e.clientX; my = e.clientY; }, {passive:true});
+  addEventListener('mousedown', ()=>{ holding = true; });
+  addEventListener('mouseup',   ()=>{ holding = false; });
+
+  const waves = [];
+  addEventListener('click', e=>{
+    waves.push({x:e.clientX*dpr, y:e.clientY*dpr, r:0, a:1});
+    if (waves.length > 5) waves.shift();
+    if (fine){
+      const s = document.createElement('div');
+      s.className = 'shock';
+      s.style.left = e.clientX+'px'; s.style.top = e.clientY+'px';
+      document.body.appendChild(s);
+      s.animate([{transform:'scale(1)',opacity:.9},{transform:'scale(24)',opacity:0}],
+                {duration:760,easing:'cubic-bezier(.2,.9,.2,1)'}).onfinish = ()=>s.remove();
+    }
+  });
+
+  let rot = 0, scroll = 0;
+  addEventListener('scroll', ()=>{ scroll = scrollY; }, {passive:true});
+
+  (function frame(){
+    rot += 0.0022;
+    const cxp = W*0.5, cyp = H*0.46 - scroll*0.22*dpr;
+    const R = Math.min(W,H)*0.33;
+    const cosR = Math.cos(rot), sinR = Math.sin(rot);
+    const tiltC = Math.cos(.42), tiltS = Math.sin(.42);
+    const mX = mx*dpr, mY = my*dpr;
+
+    g.clearRect(0,0,W,H);
+
+    for (const p of P){
+      /* rotate Y then tilt X */
+      let x = p.bx*cosR + p.bz*sinR;
+      let z = -p.bx*sinR + p.bz*cosR;
+      let y = p.by*tiltC - z*tiltS;
+      z = p.by*tiltS + z*tiltC;
+      const persp = 1.9/(2.6 - z);
+      let px = cxp + x*R*persp;
+      let py = cyp + y*R*persp;
+
+      /* mouse force field */
+      const dx = px + p.ox - mX, dy = py + p.oy - mY;
+      const d2 = dx*dx + dy*dy;
+      const rad = 190*dpr;
+      if (d2 < rad*rad){
+        const d = Math.sqrt(d2) || 1;
+        const f = (1 - d/rad) * (holding ? -1.9 : 1.5) * dpr;
+        p.vx += (dx/d)*f; p.vy += (dy/d)*f;
+      }
+      for (const w of waves){
+        const wdx = px - w.x, wdy = py - w.y;
+        const wd = Math.hypot(wdx,wdy) || 1;
+        const band = Math.abs(wd - w.r);
+        if (band < 44*dpr){
+          const f = (1 - band/(44*dpr)) * w.a * 3.4 * dpr;
+          p.vx += (wdx/wd)*f; p.vy += (wdy/wd)*f;
+        }
+      }
+      p.vx *= .90; p.vy *= .90;
+      p.ox = (p.ox + p.vx) * .93;
+      p.oy = (p.oy + p.vy) * .93;
+
+      p.sx = px + p.ox; p.sy = py + p.oy; p.sc = persp;
+    }
+
+    /* links */
+    g.lineWidth = 1*dpr;
+    for (let i=0;i<P.length;i++){
+      for (let j=i+1;j<P.length;j++){
+        const a = P[i], b = P[j];
+        const dx = a.sx-b.sx, dy = a.sy-b.sy;
+        const d2 = dx*dx+dy*dy;
+        const lim = LINK*dpr;
+        if (d2 < lim*lim){
+          const d = Math.sqrt(d2);
+          const al = (1 - d/lim) * 0.24 * Math.min(1,(a.sc+b.sc)/2.2);
+          g.strokeStyle = `rgba(77,225,255,${al.toFixed(3)})`;
+          g.beginPath(); g.moveTo(a.sx,a.sy); g.lineTo(b.sx,b.sy); g.stroke();
+        }
+      }
+    }
+    /* nodes */
+    for (const p of P){
+      const r = 1.5*p.sc*dpr;
+      const speed = Math.min(1, Math.hypot(p.vx,p.vy)/8);
+      g.fillStyle = speed > .08
+        ? `rgba(255,138,61,${(.45+speed*.5).toFixed(3)})`
+        : `rgba(215,228,240,${(.20+p.sc*.24).toFixed(3)})`;
+      g.beginPath(); g.arc(p.sx,p.sy,r + speed*2*dpr,0,7); g.fill();
+    }
+    /* wave rings */
+    for (let i=waves.length-1;i>=0;i--){
+      const w = waves[i];
+      w.r += 13*dpr; w.a *= .965;
+      if (w.a < .03){ waves.splice(i,1); continue; }
+      g.strokeStyle = `rgba(77,225,255,${(w.a*.22).toFixed(3)})`;
+      g.lineWidth = 1*dpr;
+      g.beginPath(); g.arc(w.x,w.y,w.r,0,7); g.stroke();
+    }
+
+    N++;
+    requestAnimationFrame(frame);
+  })();
+}
+
+/* ================= reticle + debug bbox ================= */
+if (fine){
+  document.body.classList.add('armed');
+  const ret = document.getElementById('ret');
+  const tag = document.getElementById('ret-tag');
+  const box = document.getElementById('bbox');
+  const dim = box.querySelector('.dim');
+  let rx = mx, ry = my, target = null;
+
+  addEventListener('mousemove', e=>{
+    mx = e.clientX; my = e.clientY;
+    tag.style.transform = `translate(${mx+22}px,${my+16}px)`;
+    const hot = e.target.closest('[data-entity],a,button');
+    ret.classList.toggle('hot', !!hot);
+    if (hot !== target){
+      target = hot;
+      if (hot){
+        const r = hot.getBoundingClientRect();
+        box.style.transform = `translate(${r.left-1}px,${r.top-1}px)`;
+        box.style.width = (r.width+2)+'px';
+        box.style.height = (r.height+2)+'px';
+        dim.textContent = `${hot.dataset.entity || hot.tagName.toLowerCase()} · ${Math.round(r.width)}×${Math.round(r.height)}`;
+        box.classList.add('on');
+        tag.textContent = hot.dataset.entity || (hot.tagName === 'A' ? 'link' : 'action');
+        tag.classList.add('on');
+      } else {
+        box.classList.remove('on');
+        tag.classList.remove('on');
+      }
+    }
+  }, {passive:true});
+
+  (function loop(){
+    rx += (mx-rx)*.24; ry += (my-ry)*.24;
+    ret.style.transform = `translate(${rx}px,${ry}px)`;
+    requestAnimationFrame(loop);
+  })();
+}
+
+/* ================= name glitch on hover ================= */
+(function(){
+  const h = document.getElementById('bigname');
+  let id = null;
+  h.addEventListener('mouseenter', ()=>{
+    if (reduce) return;
+    h.classList.add('glitch');
+    clearTimeout(id);
+  });
+  h.addEventListener('mouseleave', ()=>{
+    id = setTimeout(()=>h.classList.remove('glitch'), 160);
+  });
+})();
+
+/* ================= fps graph ================= */
+(function(){
+  const cv = document.getElementById('fps');
+  if (!cv) return;
+  const g = cv.getContext('2d');
+  const w = 74, h = 22;
+  cv.width = w*dpr; cv.height = h*dpr;
+  const hist = new Array(w).fill(16.6);
+  const fpsN = document.getElementById('fpsN'), msN = document.getElementById('msN');
+  let last = performance.now(), acc = 0, frames = 0;
+  (function tick(now){
+    const dt = now - last; last = now;
+    hist.push(dt); hist.shift();
+    acc += dt; frames++;
+    if (acc > 400){
+      fpsN.textContent = Math.round(1000/(acc/frames));
+      msN.textContent = (acc/frames).toFixed(1);
+      acc = 0; frames = 0;
+      g.clearRect(0,0,cv.width,cv.height);
+      g.strokeStyle = 'rgba(120,240,138,.85)'; g.lineWidth = 1*dpr;
+      g.beginPath();
+      for (let i=0;i<w;i++){
+        const y = h - Math.min(h, (hist[i]/40)*h);
+        i ? g.lineTo(i*dpr, y*dpr) : g.moveTo(i*dpr, y*dpr);
+      }
+      g.stroke();
+    }
+    requestAnimationFrame(tick);
+  })(performance.now());
+})();
+
+/* ================= components ================= */
+document.querySelectorAll('[data-items]').forEach(el=>{
+  el.innerHTML = el.dataset.items.split(', ').map(s=>`<li>${s}</li>`).join('');
+});
+
+/* ================= hierarchy + inspector ================= */
+const list = document.getElementById('entList');
+const inspBody = document.getElementById('inspBody');
+const inspTag = document.getElementById('inspTag');
+document.getElementById('entN').textContent = ENTITIES.length;
+
+ENTITIES.forEach((e,i)=>{
+  const b = document.createElement('button');
+  b.className = 'ent' + (i === 0 ? ' on' : '');
+  b.dataset.entity = e.id;
+  b.innerHTML = `<span class="yr">${e.years}</span><span class="nm">${e.name}</span><br><span style="font-size:11.5px">${e.role}</span>`;
+  b.addEventListener('click', ()=>select(i));
+  b.addEventListener('mouseenter', ()=>{ if (fine) select(i); });
+  list.appendChild(b);
+});
+
+function select(i){
+  const e = ENTITIES[i];
+  [...list.children].forEach((c,k)=>c.classList.toggle('on', k === i));
+  inspTag.textContent = e.id;
+  inspBody.innerHTML = `
+    <h3>${e.role} <span class="co">/ ${e.name}</span></h3>
+    <div class="loc">${e.domain}</div>
+    <dl class="prop">
+      <dt>transform</dt><dd>${e.span}</dd>
+      <dt>location</dt><dd>${e.loc}</dd>
+      <dt>stack</dt><dd class="wire">${e.stack}</dd>
+    </dl>
+    <ul>${e.items.map(([b,t])=>`<li>${b ? '<b>'+b+'</b> ' : ''}${t}</li>`).join('')}</ul>`;
+  inspBody.classList.remove('fade-in');
+  void inspBody.offsetWidth;
+  if (!reduce) inspBody.classList.add('fade-in');
+}
+select(0);
+
+/* ================= reveal ================= */
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if (!e.isIntersecting) return;
+    e.target.classList.add('seen');
+    io.unobserve(e.target);
+  });
+}, {threshold:.15});
+document.querySelectorAll('.rv,.comp').forEach(el=>io.observe(el));
+
+/* ================= nav spy ================= */
+const links = [...document.querySelectorAll('.nav a')];
+const spy = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if (!e.isIntersecting) return;
+    links.forEach(a=>a.classList.toggle('on', a.getAttribute('href') === '#'+e.target.id));
+  });
+}, {rootMargin:'-45% 0px -50% 0px'});
+['top','components','scene','assets','network'].forEach(id=>{
+  const el = document.getElementById(id); if (el) spy.observe(el);
+});
+
+/* ================= clock ================= */
+setInterval(()=>{
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-AU',{timeZone:'Australia/Sydney',hour12:false}) + ' AEST';
+}, 1000);
+})();
+</script>
+</body>
 </html>
