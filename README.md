@@ -14,6 +14,7 @@ Live at **<https://isphinx.github.io/>**.
 | `resume/resume-dev.html` | Code-editor-themed resume, laid out for A4 print. |
 | `resume/resume-dev.css` | Styles for `resume-dev.html`. |
 | `resume/*.pdf` | Exported PDFs. The homepage links to `resume/resume.pdf`. |
+| `previews/` | Archived design explorations from the homepage rebuild. Not part of the site. |
 
 ## The homepage
 
@@ -29,6 +30,14 @@ Fonts (Chakra Petch and JetBrains Mono). Editing means opening `index.html`.
 
 The page honours `prefers-reduced-motion` by dropping the canvas and entrance
 animations entirely, and swaps back to the native cursor on touch devices.
+
+## Archived explorations
+
+`previews/` holds the three directions considered during the rebuild: a dark
+terminal with a working command prompt, an oscilloscope whose waveform the
+pointer drives, and the engine viewport that shipped. They are kept for
+reference only — `previews/c-engine.html` is the draft that `index.html` grew
+out of, not a copy of it.
 
 ## Working on it locally
 
