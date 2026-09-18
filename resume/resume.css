@@ -1,0 +1,64 @@
+/* 简历专属 PDF 打印样式 */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 15mm; /* 窄边距控制在 2 页内 */
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #222222;
+  line-height: 1.35;
+  font-size: 9.5pt;
+}
+
+/* 顶部姓名与联系方式 */
+h1 {
+  font-size: 20pt;
+  text-align: center;
+  margin-bottom: 4px;
+  color: #0f172a;
+}
+
+h1 + p {
+  text-align: center;
+  font-size: 9pt;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+/* 模块大标题 */
+h2 {
+  font-size: 11pt;
+  color: #1e293b;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding-bottom: 2px;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 职位标题 */
+h3 {
+  font-size: 10pt;
+  color: #0f172a;
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+/* 列表与文字细节 */
+ul {
+  padding-left: 16px;
+  margin-top: 3px;
+  margin-bottom: 6px;
+}
+
+li {
+  margin-bottom: 2px;
+}
+
+hr {
+  display: none; /* 隐去 Markdown 的分割线，用 h2 下划线代替 */
+}
